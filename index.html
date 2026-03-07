@@ -1,0 +1,1837 @@
+<!-- OA Daily Log v15 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OA Daily Log">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111720">
+<title>OA Daily Log</title>
+<style>
+/* ══════════════════════════════════════════════════════════
+   TOKENS  — bold, high-contrast, large-print
+══════════════════════════════════════════════════════════ */
+:root {
+  --bg:         #090d12;
+  --surface:    #111720;
+  --surface2:   #192030;
+  --border:     #2c3d50;
+  --border-hi:  #3e5468;
+  --accent:     #f7c820;
+  --accent-dim: #7a5c0a;
+  --green:      #4fd468;
+  --red:        #f87070;
+  --text:       #f0f4f8;
+  --text-dim:   #afc4d6;
+  --text-muted: #607d93;
+  --mono:       'Courier New', 'Lucida Console', monospace;
+  --sans:       Georgia, 'Times New Roman', serif;
+  --radius:     10px;
+  --tap:        60px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 19px; }           /* master size bump */
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 700;                  /* BOLD everywhere by default */
+  padding-bottom: 120px;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── HEADER ───────────────────────────────────────────── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 3px solid var(--accent);
+  padding: 14px 16px 12px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 10px;
+}
+.app-header h1 {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-sm {
+  background: var(--surface2);
+  border: 1.5px solid var(--border-hi);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 44px;
+  white-space: nowrap;
+}
+.btn-sm:active { border-color: var(--accent); color: var(--accent); }
+
+/* ── TABS ─────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 57px; z-index: 99;
+}
+.tab {
+  flex: 1;
+  padding: 14px 10px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  user-select: none;
+}
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(247,200,32,0.05);
+}
+.tab:active { background: rgba(247,200,32,0.08); }
+
+/* ── PANELS ───────────────────────────────────────────── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── LAYOUT ───────────────────────────────────────────── */
+.main { max-width: 700px; margin: 0 auto; padding: 14px 12px 0; }
+
+/* ── CARD ─────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.card-header {
+  background: var(--surface2);
+  border-bottom: 1.5px solid var(--border);
+  padding: 15px 16px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; user-select: none;
+}
+.card-header:active { background: #222f40; }
+.card-title {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex: 1;
+}
+.card-summary {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  max-width: 180px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.chevron {
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 900;
+  transition: transform 0.2s;
+}
+.chevron.open { transform: rotate(90deg); }
+.card-body { display: none; padding: 16px; }
+.card-body.open { display: block; }
+
+/* ── FORM ─────────────────────────────────────────────── */
+.row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-end; }
+.row:last-child { margin-bottom: 0; }
+.field { flex: 1; min-width: 0; }
+.field-half { flex: 0 0 calc(50% - 5px); }
+
+label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+}
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  min-height: var(--tap);
+  background: var(--bg);
+  border: 2px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: max(1.05rem, 16px);  /* never below 16px — prevents mobile zoom */
+  font-weight: 700;
+  padding: 10px 13px;
+  appearance: none; -webkit-appearance: none;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="text"]:focus, input[type="date"]:focus,
+select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(247,200,32,0.15);
+}
+input[type="date"] { color-scheme: dark; }
+textarea {
+  min-height: 80px; resize: vertical;
+  font-size: 1rem; line-height: 1.6;
+}
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23afc4d6' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+/* ── COMPONENT TAG ────────────────────────────────────── */
+.comp-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(247,200,32,0.15);
+  border: 2px solid var(--accent-dim);
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--accent);
+  padding: 3px 9px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  min-width: 36px;
+}
+
+/* ── PILL SELECTOR ────────────────────────────────────── */
+.pill-group { margin-bottom: 20px; }
+.pill-group:last-child { margin-bottom: 0; }
+.pill-group-label {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 11px;
+}
+.glabel {
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.pill-clear {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  background: none;
+  transition: all 0.1s;
+  min-height: 34px;
+}
+.pill-clear:active { border-color: var(--border-hi); color: var(--red); }
+
+.pills { display: flex; flex-wrap: wrap; gap: 12px; }
+.pill {
+  background: var(--surface2);
+  border: 2px solid var(--border-hi);
+  border-radius: 26px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 11px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s;
+  line-height: 1.3;
+  min-height: 46px;
+  display: inline-flex; align-items: center;
+}
+.pill:active { transform: scale(0.96); }
+.pill.selected {
+  background: rgba(247,200,32,0.18);
+  border-color: var(--accent);
+  border-width: 2.5px;
+  color: var(--accent);
+  font-weight: 900;
+}
+.pill.pill-custom {
+  border-style: dashed;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+.pill.pill-custom.selected { border-style: solid; }
+.custom-input-wrap { display: none; margin-top: 11px; }
+.custom-input-wrap.show { display: block; }
+.custom-input-wrap input { min-height: 54px; font-size: 1rem; }
+
+/* ── STATUS / DATE ────────────────────────────────────── */
+.status-row { padding: 14px 16px; }
+
+/* ── PRESET GRID ──────────────────────────────────────── */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px 16px 16px;
+}
+.btn-preset {
+  background: var(--surface2);
+  border: 2px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 15px 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  min-height: 58px;
+  line-height: 1.4;
+}
+.btn-preset:active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.btn-preset.full-day {
+  grid-column: 1/-1;
+  background: rgba(247,200,32,0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 900;
+  min-height: 62px;
+}
+.btn-preset.full-day:active { background: rgba(247,200,32,0.2); }
+
+/* ── OUTPUT BOX ───────────────────────────────────────── */
+.output-area {
+  display: block;
+  width: 100%;
+  background: #060a0f;
+  border: 2px solid var(--border-hi);
+  border-left: 5px solid var(--accent);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: max(1.1rem, 16px);
+  font-weight: 700;
+  line-height: 1.85;
+  padding: 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #e2ecf5;
+  min-height: 140px;
+  margin-bottom: 12px;
+  resize: vertical;
+  outline: none;
+}
+
+/* ── COPY BUTTON ──────────────────────────────────────── */
+.btn-copy {
+  display: block; width: 100%;
+  background: var(--accent);
+  border: none; border-radius: var(--radius);
+  color: #080c11;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: var(--tap);
+}
+.btn-copy:active { background: #f9d84a; }
+.btn-copy.copied { background: var(--green); color: #060a0f; }
+
+/* ── TOGGLE ───────────────────────────────────────────── */
+.toggle-wrap {
+  display: flex; align-items: center;
+  gap: 13px; cursor: pointer; user-select: none;
+  padding: 7px 0;
+}
+.toggle {
+  position: relative;
+  width: 56px; height: 32px;
+  background: var(--surface2);
+  border: 2px solid var(--border-hi);
+  border-radius: 16px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.toggle.on { background: var(--accent-dim); border-color: var(--accent); }
+.toggle.on::after { transform: translateX(24px); background: var(--accent); }
+.toggle-label {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+/* ── SAVE BUTTON ──────────────────────────────────────── */
+.btn-save {
+  display: block; width: 100%;
+  background: var(--surface2);
+  border: 2px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.15s;
+  min-height: 54px;
+}
+.btn-save:active { border-color: var(--accent); color: var(--accent); }
+.btn-save.saved { border-color: var(--green); color: var(--green); }
+
+/* ── BANNER ───────────────────────────────────────────── */
+.banner {
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  display: none;
+  line-height: 1.5;
+}
+.banner.good {
+  background: rgba(79,212,104,0.09);
+  border: 1.5px solid rgba(79,212,104,0.3);
+  color: var(--green);
+}
+.banner.bad {
+  background: rgba(248,112,112,0.09);
+  border: 1.5px solid rgba(248,112,112,0.3);
+  color: var(--red);
+}
+
+/* ── INVENTORY: YES/NO BUTTONS ────────────────────────── */
+.inv-item {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.inv-item:last-child { margin-bottom: 0; }
+
+.inv-question {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 11px;
+  line-height: 1.4;
+}
+
+.yn-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.yn-btn {
+  flex: 1;
+  padding: 14px 10px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border-hi);
+  background: var(--bg);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 54px;
+  text-align: center;
+  user-select: none;
+}
+.yn-btn:active { transform: scale(0.97); }
+.yn-btn.yes-btn.active {
+  background: rgba(79,212,104,0.15);
+  border-color: var(--green);
+  border-width: 2.5px;
+  color: var(--green);
+}
+.yn-btn.no-btn.active {
+  background: rgba(248,112,112,0.15);
+  border-color: var(--red);
+  border-width: 2.5px;
+  color: var(--red);
+}
+
+.inv-elab { display: none; }
+.inv-elab.show { display: block; }
+.inv-elab input {
+  width: 100%;
+  min-height: 50px;
+  background: var(--bg);
+  border: 2px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 10px 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.inv-elab input:focus { border-color: var(--accent); }
+.inv-elab input::placeholder { color: var(--text-muted); font-weight: 400; }
+
+.inv-grateful textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 10px 13px;
+  outline: none;
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+.inv-grateful textarea:focus { border-color: var(--accent); }
+
+/* ── DAY COUNTER BADGE ────────────────────────────────── */
+.day-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(247,200,32,0.1);
+  border: 2px solid var(--accent-dim);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+/* ── FOOD COMMITTED SECTION ───────────────────────────── */
+.committed-section { margin-bottom: 12px; }
+.committed-label {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.dev-section { margin-top: 10px; display: none; }
+.dev-section.show { display: block; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+/* ── FLOATING SEND BUTTON ─────────────────────────────── */
+.floating-send {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 30px);
+  max-width: 520px;
+  z-index: 999;
+  background: #4fd468;
+  color: #060a0f;
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+.floating-send:active { transform: translateX(-50%) scale(0.98); }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════ -->
+<header class="app-header">
+  <h1>☀ OA Daily Log</h1>
+  <div class="header-actions">
+    <button class="btn-sm" onclick="loadYesterday()">↩ Yesterday</button>
+    <button class="btn-sm" onclick="clearFood()">✕ Clear Food</button>
+  </div>
+</header>
+
+<!-- ═══ TABS ══════════════════════════════════════════════ -->
+<div class="tabs">
+  <div class="tab active" id="tab-food" onclick="switchTab('food')">🍽 Food Commitment</div>
+  <div class="tab" id="tab-inv" onclick="switchTab('inv')">📋 Daily Inventory</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     FOOD TAB
+════════════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-food">
+<div class="main">
+
+  <div class="banner" id="banner"></div>
+
+  <!-- DATE + STATUS -->
+  <div class="card">
+    <div class="status-row">
+      <div class="row">
+        <div class="field field-half">
+          <label>Date</label>
+          <input type="date" id="date" oninput="onDateChange()">
+        </div>
+        <div class="field field-half">
+          <label>Status</label>
+          <select id="status" onchange="toggleAfterRow(); updateFoodOutput()">
+            <option value="Committed">Committed</option>
+            <option value="Consumed">Consumed</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="afterRow">
+        <div class="field">
+          <label>Committed after…</label>
+          <select id="committedAfter" onchange="updateFoodOutput()">
+            <option value="">— nothing prior —</option>
+            <option value="breakfast">breakfast</option>
+            <option value="morning snack">morning snack</option>
+            <option value="lunch">lunch</option>
+            <option value="afternoon snack">afternoon snack</option>
+            <option value="dinner">dinner</option>
+            <option value="evening snack">evening snack</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRESETS -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard('presets')">
+      <span class="card-title">⚡ Quick Presets</span>
+      <span class="chevron" id="presetsChev">▶</span>
+    </div>
+    <div class="card-body" id="presetsBody">
+      <div class="preset-grid" style="padding:0 0 4px">
+        <button class="btn-preset full-day" onclick="applyPreset('default_day')">⭐ My Usual Day</button>
+        <button class="btn-preset" onclick="applyPreset('breakfast')">🌅 Std Breakfast</button>
+        <button class="btn-preset" onclick="applyPreset('lunch')">☀ Std Lunch</button>
+        <button class="btn-preset" onclick="applyPreset('dinner')">🌙 Std Dinner</button>
+        <button class="btn-preset full-day" onclick="applyPreset('full')">⚡ Standard Full Day</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKFAST -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard('bf')">
+      <span class="card-title">🌅 Breakfast</span>
+      <span class="card-summary" id="bfSummary"></span>
+      <span class="chevron open" id="bfChev">▶</span>
+    </div>
+    <div class="card-body open" id="bfBody">
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">F</span><span class="glabel">Fat</span>
+          <button class="pill-clear" onclick="clearGroup('bf_fat')">clear</button>
+        </div>
+        <div class="pills" id="pills_bf_fat"></div>
+        <div class="custom-input-wrap" id="custom_bf_fat_wrap">
+          <input type="text" id="custom_bf_fat" placeholder="enter fat…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">P</span><span class="glabel">Protein</span>
+          <button class="pill-clear" onclick="clearGroup('bf_protein')">clear</button>
+        </div>
+        <div class="pills" id="pills_bf_protein"></div>
+        <div class="custom-input-wrap" id="custom_bf_protein_wrap">
+          <input type="text" id="custom_bf_protein" placeholder="enter protein…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">S</span><span class="glabel">Starch</span>
+          <button class="pill-clear" onclick="clearGroup('bf_starch')">clear</button>
+        </div>
+        <div class="pills" id="pills_bf_starch"></div>
+        <div class="custom-input-wrap" id="custom_bf_starch_wrap">
+          <input type="text" id="custom_bf_starch" placeholder="enter starch…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">F</span><span class="glabel">Fruit</span>
+          <button class="pill-clear" onclick="clearGroup('bf_fruit')">clear</button>
+        </div>
+        <div class="pills" id="pills_bf_fruit"></div>
+        <div class="custom-input-wrap" id="custom_bf_fruit_wrap">
+          <input type="text" id="custom_bf_fruit" placeholder="enter fruit…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LUNCH -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard('lu')">
+      <span class="card-title">☀ Lunch</span>
+      <span class="card-summary" id="luSummary"></span>
+      <span class="chevron open" id="luChev">▶</span>
+    </div>
+    <div class="card-body open" id="luBody">
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">F</span><span class="glabel">Fat</span>
+          <button class="pill-clear" onclick="clearGroup('lu_fat')">clear</button>
+        </div>
+        <div class="pills" id="pills_lu_fat"></div>
+        <div class="custom-input-wrap" id="custom_lu_fat_wrap">
+          <input type="text" id="custom_lu_fat" placeholder="enter fat…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">P</span><span class="glabel">Protein</span>
+          <button class="pill-clear" onclick="clearGroup('lu_protein')">clear</button>
+        </div>
+        <div class="pills" id="pills_lu_protein"></div>
+        <div class="custom-input-wrap" id="custom_lu_protein_wrap">
+          <input type="text" id="custom_lu_protein" placeholder="enter protein…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">S</span><span class="glabel">Starch</span>
+          <button class="pill-clear" onclick="clearGroup('lu_starch')">clear</button>
+        </div>
+        <div class="pills" id="pills_lu_starch"></div>
+        <div class="custom-input-wrap" id="custom_lu_starch_wrap">
+          <input type="text" id="custom_lu_starch" placeholder="enter starch…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">V</span><span class="glabel">Vegetables</span>
+          <button class="pill-clear" onclick="clearGroup('lu_veg')">clear</button>
+        </div>
+        <div class="pills" id="pills_lu_veg"></div>
+        <div class="custom-input-wrap" id="custom_lu_veg_wrap">
+          <input type="text" id="custom_lu_veg" placeholder="enter veg…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DINNER -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard('di')">
+      <span class="card-title">🌙 Dinner</span>
+      <span class="card-summary" id="diSummary"></span>
+      <span class="chevron open" id="diChev">▶</span>
+    </div>
+    <div class="card-body open" id="diBody">
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">F</span><span class="glabel">Fat</span>
+          <button class="pill-clear" onclick="clearGroup('di_fat')">clear</button>
+        </div>
+        <div class="pills" id="pills_di_fat"></div>
+        <div class="custom-input-wrap" id="custom_di_fat_wrap">
+          <input type="text" id="custom_di_fat" placeholder="enter fat…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">P</span><span class="glabel">Protein</span>
+          <button class="pill-clear" onclick="clearGroup('di_protein')">clear</button>
+        </div>
+        <div class="pills" id="pills_di_protein"></div>
+        <div class="custom-input-wrap" id="custom_di_protein_wrap">
+          <input type="text" id="custom_di_protein" placeholder="enter protein…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">S</span><span class="glabel">Starch</span>
+          <button class="pill-clear" onclick="clearGroup('di_starch')">clear</button>
+        </div>
+        <div class="pills" id="pills_di_starch"></div>
+        <div class="custom-input-wrap" id="custom_di_starch_wrap">
+          <input type="text" id="custom_di_starch" placeholder="enter starch…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">V</span><span class="glabel">Vegetables</span>
+          <button class="pill-clear" onclick="clearGroup('di_veg')">clear</button>
+        </div>
+        <div class="pills" id="pills_di_veg"></div>
+        <div class="custom-input-wrap" id="custom_di_veg_wrap">
+          <input type="text" id="custom_di_veg" placeholder="enter veg…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SNACKS -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard('sn')">
+      <span class="card-title">🍎 Snacks</span>
+      <span class="chevron open" id="snChev">▶</span>
+    </div>
+    <div class="card-body open" id="snBody">
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">AM</span><span class="glabel">Morning snack</span>
+          <button class="pill-clear" onclick="clearGroup('sn_morning')">clear</button>
+        </div>
+        <div class="pills" id="pills_sn_morning"></div>
+        <div class="custom-input-wrap" id="custom_sn_morning_wrap">
+          <input type="text" id="custom_sn_morning" placeholder="morning snack…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">PM</span><span class="glabel">Afternoon snack</span>
+          <button class="pill-clear" onclick="clearGroup('sn_afternoon')">clear</button>
+        </div>
+        <div class="pills" id="pills_sn_afternoon"></div>
+        <div class="custom-input-wrap" id="custom_sn_afternoon_wrap">
+          <input type="text" id="custom_sn_afternoon" placeholder="afternoon snack…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+      <div class="pill-group">
+        <div class="pill-group-label">
+          <span class="comp-tag">EVE</span><span class="glabel">Evening snack</span>
+          <button class="pill-clear" onclick="clearGroup('sn_evening')">clear</button>
+        </div>
+        <div class="pills" id="pills_sn_evening"></div>
+        <div class="custom-input-wrap" id="custom_sn_evening_wrap">
+          <input type="text" id="custom_sn_evening" placeholder="evening snack…" oninput="updateFoodOutput()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="card">
+    <div class="card-header" style="cursor:default">
+      <span class="card-title">📋 Food Output</span>
+    </div>
+    <div class="card-body open">
+      <textarea class="output-area" id="foodOutputArea"></textarea>
+      <button class="btn-copy" id="foodCopyBtn" onclick="copyOutput('foodOutputArea','foodCopyBtn')">Copy to Clipboard</button>
+      <button class="btn-copy" style="margin-top:10px;background:#4fd468;color:#060a0f;" onclick="sendText('foodOutputArea')">📱 Send Text Message</button>
+    </div>
+  </div>
+
+  <!-- OA STEPS -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard('oa')">
+      <span class="card-title">📖 OA Steps &amp; Traditions</span>
+      <span class="chevron" id="oaChev">▶</span>
+    </div>
+    <div class="card-body" id="oaBody">
+      <div style="margin-bottom:12px">
+        <div class="toggle-wrap" onclick="toggleAppendOA()">
+          <div class="toggle" id="oaToggle"></div>
+          <span class="toggle-label">Append to food message</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Step / Reading text</label>
+          <textarea id="oaText" rows="5" placeholder="Paste OA step, tradition, or reading here…" oninput="updateFoodOutput()"></textarea>
+        </div>
+      </div>
+      <button class="btn-save" id="oaSaveBtn" onclick="saveOAText()">💾 Save to Browser</button>
+    </div>
+  </div>
+
+  <div style="height:80px"></div>
+</div><!-- /main food -->
+</div><!-- /panel-food -->
+<button class="floating-send" id="floatFoodBtn" onclick="sendText('foodOutputArea')">📱 Send Food Text</button>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     INVENTORY TAB
+════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-inv">
+<div class="main">
+
+  <!-- DAY BADGE + DATE (reads from shared date) -->
+  <div class="card">
+    <div class="card-body open">
+      <div class="day-badge" id="invDayBadge">Day —</div>
+      <div class="row">
+        <div class="field field-half">
+          <label>Date</label>
+          <input type="date" id="invDate" oninput="onInvDateChange()">
+        </div>
+        <div class="field field-half">
+          <label>Display</label>
+          <div style="font-family:var(--mono); font-size:1rem; font-weight:900; color:var(--accent);
+                      padding:14px 13px; background:var(--bg); border:2px solid var(--border-hi);
+                      border-radius:var(--radius); min-height:var(--tap); display:flex; align-items:center;"
+               id="invDateDisplay">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRE-COMMITTED FOOD -->
+  <div class="card">
+    <div class="card-header" style="cursor:default">
+      <span class="card-title">🍽 Pre-Committed Food?</span>
+    </div>
+    <div class="card-body open">
+      <div class="yn-row" style="margin-bottom:0">
+        <button class="yn-btn yes-btn" id="committed_yes" onclick="setCommitted('yes')">YES</button>
+        <button class="yn-btn no-btn"  id="committed_no"  onclick="setCommitted('no')">NO</button>
+      </div>
+      <!-- deviation sub-section -->
+      <div class="dev-section" id="devSection">
+        <hr>
+        <div class="committed-label">Any deviations from your commitment?</div>
+        <div class="yn-row" style="margin-bottom:0">
+          <button class="yn-btn yes-btn" id="dev_yes" onclick="setDeviation('yes')">YES</button>
+          <button class="yn-btn no-btn"  id="dev_no"  onclick="setDeviation('no')">NO</button>
+        </div>
+        <div class="dev-section" id="devTextField" style="margin-top:10px;">
+          <input type="text" id="devText" placeholder="Describe the deviation(s)…" oninput="updateInvOutput()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTORY QUESTIONS -->
+  <div class="card">
+    <div class="card-header" style="cursor:default">
+      <span class="card-title">🔍 Daily Inventory</span>
+    </div>
+    <div class="card-body open" id="invQuestionsBody">
+      <!-- Normal Day button + questions built by JS -->
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="card">
+    <div class="card-header" style="cursor:default">
+      <span class="card-title">📋 Inventory Output</span>
+    </div>
+    <div class="card-body open">
+      <textarea class="output-area" id="invOutputArea"></textarea>
+      <button class="btn-copy" id="invCopyBtn" onclick="copyOutput('invOutputArea','invCopyBtn')">Copy to Clipboard</button>
+      <button class="btn-copy" style="margin-top:10px;background:#4fd468;color:#060a0f;" onclick="sendText('invOutputArea')">📱 Send Text Message</button>
+    </div>
+  </div>
+
+  <div style="height:80px"></div>
+</div><!-- /main inv -->
+</div><!-- /panel-inv -->
+<button class="floating-send" id="floatInvBtn" onclick="sendText('invOutputArea')">📱 Send Inventory Text</button>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────────
+// PILL OPTIONS  — edit these to update your common choices
+// ─────────────────────────────────────────────────────────
+const OPTIONS = {
+  bf_fat: [
+    '3T flax/chia',
+    '3T flax/chia/guac',
+    '3T flax/chia + 2oz guac',
+  ],
+  bf_protein: [
+    'scrambled eggs',
+    'boiled eggs',
+    '3 egg bites',
+    '2 plant-based sausages',
+    '3 plant-based sausages',
+  ],
+  bf_starch: [
+    '6 oz potatoes',
+    'country potatoes',
+    '1 slice Ezekiel toast',
+    '2 slices Ezekiel toast',
+  ],
+  bf_fruit: [
+    '6 oz berries',
+  ],
+  lu_fat: [
+    "30g Newman's",
+    "15g Newman's + avocado",
+  ],
+  lu_protein: [
+    'tofu',
+    'beef',
+  ],
+  lu_starch: [
+    '3 oz peas 3 oz corn',
+    'corn tortilla',
+  ],
+  lu_veg: [
+    '13.5 oz chopped salad mix',
+  ],
+  di_fat: [
+    '2 oz sour cream',
+    '2 oz mayo',
+    '2 oz bitchin sauce',
+    '2 oz hummus',
+    '1 oz mayo / 1 oz bitchin sauce',
+    '1 oz hummus / 1 oz mayo',
+    '1 oz bitchin sauce / 1 oz sour cream',
+  ],
+  di_protein: [
+    'beef',
+    'beans',
+    'garbanzos',
+  ],
+  di_starch: [
+    'brown rice/chia',
+    'sweet potatoes',
+    'potatoes',
+    'brown rice',
+    'corn tortilla',
+  ],
+  di_veg: [
+    '10 oz mixed veggies',
+    '10 oz broccoli',
+    '10 oz spinach',
+    '10 oz Brussels sprouts',
+    '10 oz peas and carrots',
+    '10 oz carrots and green beans',
+    '10 oz cauliflower',
+  ],
+  sn_morning: [
+    'apple',
+    'orange',
+    'berries',
+    'trail mix',
+    'almond milk, banana and PB powder',
+  ],
+  sn_afternoon: [
+    'almond milk, banana and PB powder',
+    'orange and boiled eggs',
+    'orange and nuts',
+    'trail mix',
+    'orange and protein bar',
+    'apple and trail mix',
+    'berries and trail mix',
+  ],
+  sn_evening: [
+    'almond milk, banana and PB powder',
+    'orange and boiled eggs',
+    'trail mix',
+    'orange and nuts',
+    'protein bar and beef stick',
+    'frozen berries and cottage cheese',
+    'berries and trail mix',
+  ],
+};
+
+// ─────────────────────────────────────────────────────────
+// STANDARD PRESETS
+// ─────────────────────────────────────────────────────────
+const PRESETS = {
+  breakfast: {
+    bf_fat:     '3T flax/chia/guac',
+    bf_protein: 'scrambled eggs',
+    bf_starch:  '6 oz potatoes',
+    bf_fruit:   '6 oz berries',
+  },
+  lunch: {
+    lu_fat:     "30g Newman's",
+    lu_protein: 'tofu',
+    lu_starch:  '3 oz peas 3 oz corn',
+    lu_veg:     '13.5 oz chopped salad mix',
+  },
+  dinner: {
+    di_fat:     '2 oz sour cream',
+    di_protein: 'beans',
+    di_starch:  'brown rice/chia',
+    di_veg:     '10 oz mixed veggies',
+  },
+  // Populates breakfast + lunch + partial dinner; leaves snacks & dinner veg blank
+  default_day: {
+    bf_fat:     '3T flax/chia/guac',
+    bf_protein: 'scrambled eggs',
+    bf_starch:  '6 oz potatoes',
+    bf_fruit:   '6 oz berries',
+    lu_fat:     "30g Newman's",
+    lu_protein: 'tofu',
+    lu_starch:  '3 oz peas 3 oz corn',
+    lu_veg:     '13.5 oz chopped salad mix',
+    di_fat:     '2 oz sour cream',
+    di_protein: 'beans',
+    di_starch:  'brown rice/chia',
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+// INVENTORY QUESTION DEFINITIONS
+// ─────────────────────────────────────────────────────────
+const INV_QUESTIONS = [
+  { id: 'resentful',  label: 'Resentful',                  type: 'yn' },
+  { id: 'selfish',    label: 'Selfish',                    type: 'yn' },
+  { id: 'afraid',     label: 'Afraid',                     type: 'yn' },
+  { id: 'apology',    label: 'Owe apology for something',  type: 'yn' },
+  { id: 'kind',       label: 'Kind and loving',            type: 'yn' },
+  { id: 'self',       label: 'Thinking of self',           type: 'yn' },
+  { id: 'others',     label: 'Thinking of others',         type: 'yn' },
+  { id: 'grateful',   label: 'Grateful for',               type: 'text' },
+];
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+const SELECTED = {};
+let appendOA   = false;
+
+// Inventory state
+const INV = {
+  committed: null,  // 'yes' | 'no' | null
+  deviated:  null,  // 'yes' | 'no' | null
+};
+const INV_ANSWERS = {}; // { id: { yn: 'yes'|'no'|null, elab: '' } }
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// HAPTIC FEEDBACK
+// ─────────────────────────────────────────────────────────
+function haptic() {
+  if (navigator.vibrate) {
+    navigator.vibrate(10);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// MOBILE KEYBOARD PROTECTION
+// ─────────────────────────────────────────────────────────
+function handleKeyboardFocus() {
+  const foodBtn = document.getElementById('floatFoodBtn');
+  const invBtn = document.getElementById('floatInvBtn');
+  document.querySelectorAll('input, textarea').forEach(el => {
+    el.addEventListener('focus', () => {
+      if (foodBtn) foodBtn.style.display = 'none';
+      if (invBtn) invBtn.style.display = 'none';
+    });
+    el.addEventListener('blur', () => {
+      const foodTab = document.getElementById('panel-food').classList.contains('active');
+      const invTab = document.getElementById('panel-inv').classList.contains('active');
+      if (foodTab && foodBtn) foodBtn.style.display = 'block';
+      if (invTab && invBtn) invBtn.style.display = 'block';
+    });
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setToday();
+  const invDateField = document.getElementById('invDate');
+  if (!invDateField.value) {
+    invDateField.value = document.getElementById('date').value;
+  }
+  buildAllPillGroups();
+  buildInventoryUI();
+
+  const savedOA = localStorage.getItem('oa_text');
+  if (savedOA) document.getElementById('oaText').value = savedOA;
+  if (localStorage.getItem('oa_append') === 'true') {
+    appendOA = true;
+    document.getElementById('oaToggle').classList.add('on');
+  }
+
+  // PART 1 — Auto-load yesterday's food selections
+  const saved = localStorage.getItem('oa_today');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      ALL_KEYS.forEach(k => {
+        SELECTED[k] = data['sel_' + k] || null;
+        const inp = document.getElementById('custom_' + k);
+        if (inp) inp.value = data['cust_' + k] || '';
+        refreshPills(k);
+        syncWrap(k);
+      });
+      document.getElementById('status').value = data._status || 'Committed';
+      document.getElementById('committedAfter').value = data._after || '';
+      setToday();
+    } catch(e) {}
+  }
+
+  // PART 3 — Auto-open all meal sections
+  ensureOpen('bf'); ensureOpen('lu'); ensureOpen('di');
+
+  toggleAfterRow();
+  updateFoodOutput();
+  updateInvDisplay();
+  updateInvOutput();
+
+  // PART 2 — Open food tab by default
+  switchTab('food');
+  handleKeyboardFocus();
+});
+
+// ─────────────────────────────────────────────────────────
+// DATE HELPERS
+// ─────────────────────────────────────────────────────────
+function setToday() {
+  const n = new Date();
+  const s = toDateInputVal(n);
+  document.getElementById('date').value = s;
+}
+
+function toDateInputVal(dt) {
+  const pad = x => String(x).padStart(2,'0');
+  return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+}
+
+function parseDate(str) {
+  if (!str) return null;
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function formatFoodDate(str) {
+  // Returns "Fri\n2/13/2026" (two lines for food output)
+  if (!str) return '';
+  const dt = parseDate(str);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return `${days[dt.getDay()]}\n${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+}
+
+function formatInvDate(str) {
+  // Returns "Fri  2/20/26" — two spaces, 2-digit year
+  if (!str) return '';
+  const dt = parseDate(str);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const yy = String(dt.getFullYear()).slice(-2);
+  return `${days[dt.getDay()]}  ${dt.getMonth()+1}/${dt.getDate()}/${yy}`;
+}
+
+function calcDay(str) {
+  // Day 1 = Nov 14, 2024; returns integer
+  if (!str) return null;
+  const start = new Date(2024, 10, 14); // Nov 14, 2024
+  const end   = parseDate(str);
+  if (!end) return null;
+  const diff = Math.round((end - start) / 86400000);
+  return diff + 1;
+}
+
+function onDateChange() {
+  const val = document.getElementById('date').value;
+  updateFoodOutput();
+  updateInvDisplay();
+  updateInvOutput();
+}
+
+function onInvDateChange() {
+  updateInvDisplay();
+  updateInvOutput();
+}
+
+function updateInvDisplay() {
+  const str = document.getElementById('invDate').value;
+  const day = calcDay(str);
+  document.getElementById('invDayBadge').textContent = day ? `Day ${day}` : 'Day —';
+  document.getElementById('invDateDisplay').textContent = formatInvDate(str) || '—';
+}
+
+// ─────────────────────────────────────────────────────────
+// FOCUS NEXT UNANSWERED INVENTORY QUESTION
+// ─────────────────────────────────────────────────────────
+function focusNextInventoryQuestion() {
+  for (const q of INV_QUESTIONS) {
+    if (q.type === 'yn') {
+      if (INV_ANSWERS[q.id].yn === null) {
+        const btn = document.getElementById(`inv_${q.id}_yes`);
+        if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        return;
+      }
+    }
+  }
+  // All answered — scroll to Grateful For
+  const grateful = document.getElementById('inv_grateful_text');
+  if (grateful) {
+    grateful.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest'
+    });
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// TAB SWITCHING
+// ─────────────────────────────────────────────────────────
+function switchTab(which) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + which).classList.add('active');
+  document.getElementById('panel-' + which).classList.add('active');
+  // Show only the floating button for the active tab
+  document.getElementById('floatFoodBtn').style.display = which === 'food' ? 'block' : 'none';
+  document.getElementById('floatInvBtn').style.display  = which === 'inv'  ? 'block' : 'none';
+  // Scroll to first unanswered question when inventory tab opens
+  if (which === 'inv') {
+    setTimeout(() => {
+      focusNextInventoryQuestion();
+    }, 150);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// CARD TOGGLE
+// ─────────────────────────────────────────────────────────
+function toggleCard(id) {
+  const body = document.getElementById(id + 'Body');
+  const chev = document.getElementById(id + 'Chev');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', open);
+}
+
+function toggleAfterRow() {
+  document.getElementById('afterRow').style.display =
+    document.getElementById('status').value === 'Committed' ? '' : 'none';
+}
+
+// ─────────────────────────────────────────────────────────
+// BUILD PILLS
+// ─────────────────────────────────────────────────────────
+function buildAllPillGroups() {
+  Object.keys(OPTIONS).forEach(buildPillGroup);
+}
+
+function buildPillGroup(key) {
+  const container = document.getElementById('pills_' + key);
+  if (!container) return;
+  container.innerHTML = '';
+  if (SELECTED[key] === undefined) SELECTED[key] = null;
+
+  OPTIONS[key].forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (SELECTED[key] === opt ? ' selected' : '');
+    btn.textContent = opt;
+    btn.addEventListener('click', () => selectPill(key, opt));
+    container.appendChild(btn);
+  });
+
+  const custom = document.createElement('button');
+  custom.className = 'pill pill-custom' + (SELECTED[key] === '__custom__' ? ' selected' : '');
+  custom.textContent = '+ custom…';
+  custom.addEventListener('click', () => selectPill(key, '__custom__'));
+  container.appendChild(custom);
+
+  syncWrap(key);
+}
+
+function selectPill(key, value) {
+  haptic();
+  SELECTED[key] = (SELECTED[key] === value) ? null : value;
+  refreshPills(key);
+  syncWrap(key);
+  updateFoodOutput();
+}
+
+function refreshPills(key) {
+  const container = document.getElementById('pills_' + key);
+  if (!container) return;
+  container.querySelectorAll('.pill').forEach(btn => {
+    const val = btn.classList.contains('pill-custom') ? '__custom__' : btn.textContent;
+    btn.classList.toggle('selected', SELECTED[key] === val);
+  });
+}
+
+function syncWrap(key) {
+  const wrap = document.getElementById('custom_' + key + '_wrap');
+  if (wrap) wrap.classList.toggle('show', SELECTED[key] === '__custom__');
+}
+
+function clearGroup(key) {
+  SELECTED[key] = null;
+  const inp = document.getElementById('custom_' + key);
+  if (inp) inp.value = '';
+  refreshPills(key);
+  syncWrap(key);
+  updateFoodOutput();
+}
+
+function groupVal(key) {
+  const sel = SELECTED[key];
+  if (!sel) return '';
+  if (sel === '__custom__') return (document.getElementById('custom_' + key)?.value || '').trim();
+  return sel;
+}
+
+// ─────────────────────────────────────────────────────────
+// FOOD OUTPUT — multi-line format matching SMS screenshot
+// ─────────────────────────────────────────────────────────
+function updateFoodOutput() {
+  const dateStr = document.getElementById('date').value;
+  const status  = document.getElementById('status').value;
+  const after   = document.getElementById('committedAfter').value;
+
+  const lines = [];
+
+  // Line 1-2: date (two lines: weekday, then M/D/YYYY)
+  if (dateStr) lines.push(formatFoodDate(dateStr));
+
+  // Line 3: status
+  if (status === 'Committed') {
+    lines.push(after ? `Committed after ${after}` : 'Committed');
+  } else {
+    lines.push('Consumed');
+  }
+
+  // Build each meal as a block
+  function mealBlock(mealLabel, parts) {
+    const filled = parts.filter(p => p.v);
+    if (!filled.length) return '';
+    const rows = filled.map(p => `${p.t}: ${p.v}`);
+    return mealLabel + '\n' + rows.join('\n');
+  }
+
+  const bf = mealBlock('Breakfast', [
+    { t:'F',  v: groupVal('bf_fat')     },
+    { t:'P',  v: groupVal('bf_protein') },
+    { t:'S',  v: groupVal('bf_starch')  },
+    { t:'F',  v: groupVal('bf_fruit')   },
+  ]);
+  const lu = mealBlock('Lunch', [
+    { t:'F',  v: groupVal('lu_fat')     },
+    { t:'P',  v: groupVal('lu_protein') },
+    { t:'S',  v: groupVal('lu_starch')  },
+    { t:'V',  v: groupVal('lu_veg')     },
+  ]);
+  const di = mealBlock('Dinner', [
+    { t:'F',  v: groupVal('di_fat')     },
+    { t:'P',  v: groupVal('di_protein') },
+    { t:'S',  v: groupVal('di_starch')  },
+    { t:'V',  v: groupVal('di_veg')     },
+  ]);
+
+  // Snacks — each on own line
+  const snLines = [];
+  const sm = groupVal('sn_morning');
+  const sa = groupVal('sn_afternoon');
+  const se = groupVal('sn_evening');
+  if (sm) snLines.push('Morning snack - ' + sm);
+  if (sa) snLines.push('Afternoon snack - ' + sa);
+  if (se) snLines.push('Evening snack - ' + se);
+
+  // Assemble with blank line between meals
+  [bf, lu, di].forEach(block => { if (block) lines.push('', block); });
+  if (snLines.length) lines.push('', snLines.join('\n'));
+
+  // OA append
+  if (appendOA) {
+    const oa = (document.getElementById('oaText').value || '').trim();
+    if (oa) { lines.push('', oa); }
+  }
+
+  document.getElementById('foodOutputArea').value = lines.join('\n').replace(/^\n/, '') || '—';
+
+  setSummary('bf', [groupVal('bf_protein'), groupVal('bf_starch')]);
+  setSummary('lu', [groupVal('lu_protein'), groupVal('lu_starch')]);
+  setSummary('di', [groupVal('di_protein'), groupVal('di_starch')]);
+
+  saveToday();
+}
+
+function setSummary(meal, vals) {
+  const el = document.getElementById(meal + 'Summary');
+  if (el) el.textContent = vals.filter(Boolean).join(' · ');
+}
+
+// ─────────────────────────────────────────────────────────
+// PRESETS
+// ─────────────────────────────────────────────────────────
+function applyPreset(which) {
+  haptic();
+  function apply(map) {
+    Object.entries(map).forEach(([key, val]) => {
+      if (OPTIONS[key] && OPTIONS[key].includes(val)) {
+        SELECTED[key] = val;
+      } else {
+        SELECTED[key] = '__custom__';
+        const inp = document.getElementById('custom_' + key);
+        if (inp) inp.value = val;
+      }
+      refreshPills(key);
+      syncWrap(key);
+    });
+  }
+  if (which === 'default_day') {
+    apply(PRESETS.default_day);
+    ensureOpen('bf'); ensureOpen('lu'); ensureOpen('di');
+  } else {
+    if (which === 'breakfast' || which === 'full') { apply(PRESETS.breakfast); ensureOpen('bf'); }
+    if (which === 'lunch'     || which === 'full') { apply(PRESETS.lunch);     ensureOpen('lu'); }
+    if (which === 'dinner'    || which === 'full') { apply(PRESETS.dinner);    ensureOpen('di'); }
+  }
+  updateFoodOutput();
+  // PART 4 — Scroll floating send button into view after preset applied
+  setTimeout(() => {
+    const btn = document.getElementById('floatFoodBtn');
+    if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  }, 120);
+}
+
+function ensureOpen(id) {
+  const body = document.getElementById(id + 'Body');
+  const chev = document.getElementById(id + 'Chev');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    if (chev) chev.classList.add('open');
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// BUILD INVENTORY UI
+// ─────────────────────────────────────────────────────────
+function buildInventoryUI() {
+  const container = document.getElementById('invQuestionsBody');
+  container.innerHTML = `
+    <button class="btn-preset full-day" style="width:100%;margin-bottom:16px;"
+      onclick="applyNormalInventory()">
+      ✓ Normal Day
+    </button>
+  `;
+
+  INV_QUESTIONS.forEach(q => {
+    INV_ANSWERS[q.id] = { yn: null, elab: '' };
+    const div = document.createElement('div');
+    div.className = 'inv-item';
+
+    if (q.type === 'yn') {
+      div.innerHTML = `
+        <div class="inv-question">${q.label}</div>
+        <div class="yn-row">
+          <button class="yn-btn yes-btn" id="inv_${q.id}_yes"
+            onclick="setInvAnswer('${q.id}','yes')">YES</button>
+          <button class="yn-btn no-btn" id="inv_${q.id}_no"
+            onclick="setInvAnswer('${q.id}','no')">NO</button>
+        </div>
+        <div class="inv-elab" id="inv_${q.id}_elab">
+          <input type="text" id="inv_${q.id}_text"
+            placeholder="Add details (optional)…"
+            oninput="INV_ANSWERS['${q.id}'].elab=this.value; updateInvOutput()">
+        </div>`;
+    } else {
+      // Text only (Grateful for)
+      div.innerHTML = `
+        <div class="inv-question">${q.label}</div>
+        <div class="inv-grateful">
+          <textarea id="inv_${q.id}_text" rows="3"
+            placeholder="What are you grateful for today?"
+            oninput="INV_ANSWERS['${q.id}'].elab=this.value; updateInvOutput()"></textarea>
+        </div>`;
+    }
+
+    container.appendChild(div);
+  });
+}
+
+function setInvAnswer(id, value) {
+  haptic();
+  INV_ANSWERS[id].yn = (INV_ANSWERS[id].yn === value) ? null : value;
+
+  // Update button styles
+  const yBtn = document.getElementById(`inv_${id}_yes`);
+  const nBtn = document.getElementById(`inv_${id}_no`);
+  if (yBtn) yBtn.classList.toggle('active', INV_ANSWERS[id].yn === 'yes');
+  if (nBtn) nBtn.classList.toggle('active', INV_ANSWERS[id].yn === 'no');
+
+  // Show elaboration field whenever any answer is selected
+  const elab = document.getElementById(`inv_${id}_elab`);
+  if (elab) elab.classList.toggle('show', INV_ANSWERS[id].yn !== null);
+
+  updateInvOutput();
+}
+
+// ─────────────────────────────────────────────────────────
+// PRE-COMMITTED FOOD SECTION
+// ─────────────────────────────────────────────────────────
+function setCommitted(val) {
+  haptic();
+  INV.committed = (INV.committed === val) ? null : val;
+  document.getElementById('committed_yes').classList.toggle('active', INV.committed === 'yes');
+  document.getElementById('committed_no').classList.toggle('active',  INV.committed === 'no');
+  document.getElementById('devSection').classList.toggle('show', INV.committed === 'yes');
+  updateInvOutput();
+}
+
+function setDeviation(val) {
+  haptic();
+  INV.deviated = (INV.deviated === val) ? null : val;
+  document.getElementById('dev_yes').classList.toggle('active', INV.deviated === 'yes');
+  document.getElementById('dev_no').classList.toggle('active',  INV.deviated === 'no');
+  document.getElementById('devTextField').classList.toggle('show', INV.deviated === 'yes');
+  updateInvOutput();
+}
+
+// ─────────────────────────────────────────────────────────
+// NORMAL INVENTORY PRESET
+// ─────────────────────────────────────────────────────────
+function applyNormalInventory() {
+  haptic();
+  setInvAnswer('resentful', 'no');
+  setInvAnswer('selfish',   'no');
+  setInvAnswer('afraid',    'no');
+  setInvAnswer('apology',   'no');
+  setInvAnswer('kind',      'yes');
+  setInvAnswer('self',      'no');
+  setInvAnswer('others',    'yes');
+  updateInvOutput();
+  setTimeout(() => {
+    const btn = document.getElementById('floatInvBtn');
+    if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  }, 150);
+}
+
+// ─────────────────────────────────────────────────────────
+// INVENTORY OUTPUT
+// Format: Scott P [Day] [M/D/YY] Day [N] [food status]  [items]  Grateful for - [text]
+// ─────────────────────────────────────────────────────────
+function updateInvOutput() {
+  const dateStr = document.getElementById('invDate').value;
+  const day     = calcDay(dateStr);
+  const invDate = formatInvDate(dateStr);
+
+  // Header
+  let header = `Scott P ${invDate}`;
+  if (day) header += ` Day ${day}`;
+
+  // Food commitment status
+  let foodStatus = '';
+  if (INV.committed === 'yes') {
+    if (INV.deviated === 'yes') {
+      const devText = (document.getElementById('devText')?.value || '').trim();
+      foodStatus = devText || 'Had deviations from commitment';
+    } else if (INV.deviated === 'no') {
+      foodStatus = 'Ate committed food';
+    }
+  }
+  // If committed===no, leave blank (or you could add a note)
+
+  // Inventory items
+  const itemParts = [];
+  INV_QUESTIONS.forEach(q => {
+    const ans = INV_ANSWERS[q.id];
+    if (q.type === 'yn') {
+      if (ans.yn !== null) {
+        let part = `${q.label} - ${ans.yn}`;
+        if (ans.elab) part += ` (${ans.elab})`;
+        itemParts.push(part);
+      }
+    } else {
+      // Grateful for
+      if (ans.elab) {
+        itemParts.push(`${q.label} - ${ans.elab}`);
+      }
+    }
+  });
+
+  // Assemble — each item on its own line
+  const lines = [header];
+  if (foodStatus) lines.push(foodStatus);
+  itemParts.forEach(p => lines.push(p));
+
+  document.getElementById('invOutputArea').value =
+    lines.length > 1 ? lines.join('\n') : '—';
+}
+
+// ─────────────────────────────────────────────────────────
+// COPY TO CLIPBOARD
+// ─────────────────────────────────────────────────────────
+function copyOutput(areaId, btnId) {
+  const text = document.getElementById(areaId).value;
+  if (!text || text === '—') return;
+  const btn  = document.getElementById(btnId);
+  const done = () => {
+    if (navigator.vibrate) navigator.vibrate(20);
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy to Clipboard'; btn.classList.remove('copied'); }, 2200);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// YESTERDAY (food fields only)
+// ─────────────────────────────────────────────────────────
+const ALL_KEYS = Object.keys(OPTIONS);
+
+function saveToday() {
+  const data = {
+    _status: document.getElementById('status').value,
+    _after:  document.getElementById('committedAfter').value,
+  };
+  ALL_KEYS.forEach(k => {
+    data['sel_' + k]  = SELECTED[k];
+    const inp = document.getElementById('custom_' + k);
+    data['cust_' + k] = inp ? inp.value : '';
+  });
+  localStorage.setItem('oa_today', JSON.stringify(data));
+}
+
+function loadYesterday() {
+  const raw = localStorage.getItem('oa_today');
+  if (!raw) { flash('No previous entry found.', false); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+
+  document.getElementById('status').value = data._status || 'Committed';
+  document.getElementById('committedAfter').value = data._after || '';
+
+  ALL_KEYS.forEach(k => {
+    SELECTED[k] = data['sel_' + k] || null;
+    const inp = document.getElementById('custom_' + k);
+    if (inp) inp.value = data['cust_' + k] || '';
+    refreshPills(k);
+    syncWrap(k);
+  });
+
+  setToday();
+  toggleAfterRow();
+  updateFoodOutput();
+  flash("✓ Loaded yesterday's entries — date set to today.", true);
+}
+
+function clearFood() {
+  if (!confirm('Clear all meal selections?')) return;
+  ALL_KEYS.forEach(k => {
+    SELECTED[k] = null;
+    const inp = document.getElementById('custom_' + k);
+    if (inp) inp.value = '';
+    refreshPills(k);
+    syncWrap(k);
+  });
+  document.getElementById('committedAfter').value = '';
+  updateFoodOutput();
+}
+
+// ─────────────────────────────────────────────────────────
+// OA STEPS
+// ─────────────────────────────────────────────────────────
+function toggleAppendOA() {
+  appendOA = !appendOA;
+  document.getElementById('oaToggle').classList.toggle('on', appendOA);
+  localStorage.setItem('oa_append', String(appendOA));
+  updateFoodOutput();
+}
+
+function saveOAText() {
+  localStorage.setItem('oa_text', document.getElementById('oaText').value);
+  const btn = document.getElementById('oaSaveBtn');
+  btn.textContent = '✓ Saved!';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = '💾 Save to Browser'; btn.classList.remove('saved'); }, 2000);
+}
+
+// ─────────────────────────────────────────────────────────
+// SEND TEXT MESSAGE
+// ─────────────────────────────────────────────────────────
+function sendText(areaId) {
+  const text = document.getElementById(areaId).value.trim();
+  if (!text || text === '—') return;
+
+  const phone = ''; // optional: pre-fill sponsor's number e.g. '15551234567'
+  const encoded = encodeURIComponent(text);
+  const smsLink = `sms:${phone}?body=${encoded}`;
+
+  window.location.href = smsLink;
+}
+
+// ─────────────────────────────────────────────────────────
+// BANNER
+// ─────────────────────────────────────────────────────────
+function flash(msg, good) {
+  const el = document.getElementById('banner');
+  el.className = 'banner ' + (good ? 'good' : 'bad');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
